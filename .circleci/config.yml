@@ -1,0 +1,186 @@
+version: 2.1
+
+executors:
+  vs2019:
+    description: >
+      An executor preloaded with visual studios 2019 plus a number of other
+      development tools.
+    parameters:
+      version:
+        type: string
+        description: The image version to use when executing. Defaults to "201908-06"
+        default: "201908-06"
+      shell:
+        type: string
+        description: >
+          The shell to use.
+          Defaults to `powershell.exe -ExecutionPolicy Bypass`
+        default: powershell.exe -ExecutionPolicy Bypass
+    machine:
+      image: "windows-server-2019-vs2019:<< parameters.version >>"
+      resource_class: windows.medium
+      shell: << parameters.shell >>
+
+jobs:
+  test-linux:
+    docker:
+      - image: hchauvin/dsk-build:latest
+    steps:
+      - checkout
+      - run: bazel build //...
+      - run: bazel test //...
+      - run: mv bazel-bin/monorepo_tools.zip monorepo_tools_linux_amd64.zip
+      - persist_to_workspace:
+          root: '.'
+          paths:
+            - monorepo_tools_linux_amd64.zip
+  test-linux-standalone:
+    docker:
+      - image: hchauvin/dsk-build:latest
+    steps:
+      - attach_workspace:
+          at: ./artifacts
+      - run: python ./artifacts/monorepo_tools_linux_amd64.zip --help
+      - run: python2 ./artifacts/monorepo_tools_linux_amd64.zip --help
+  test-windows-py3:
+    executor:
+      name: vs2019
+    steps:
+      - checkout
+      - run: choco install --no-progress bazel
+      - run: choco install --no-progress python
+      - run: pip install wheel
+      - run: bazel build //...
+      - run: bazel test //...
+      - run: mv bazel-bin/monorepo_tools.zip monorepo_tools_py3_windows_amd64.zip
+      - persist_to_workspace:
+          root: '.'
+          paths:
+            - monorepo_tools_py3_windows_amd64.zip
+  test-windows-standalone-py3:
+    executor:
+      name: vs2019
+    steps:
+      - attach_workspace:
+          at: ./artifacts
+      - run: choco install --no-progress python
+      - run: python ./artifacts/monorepo_tools_py3_windows_amd64.zip --help
+  test-windows-py2:
+    executor:
+      name: vs2019
+    steps:
+      - checkout
+      - run: choco install --no-progress bazel
+      - run: pip install wheel
+      - run: bazel build //...
+      - run: bazel test //...
+      - run: mv bazel-bin/monorepo_tools.zip monorepo_tools_py2_windows_amd64.zip
+      - persist_to_workspace:
+          root: '.'
+          paths:
+            - monorepo_tools_py2_windows_amd64.zip
+  test-windows-standalone-py2:
+    executor:
+      name: vs2019
+    steps:
+      - attach_workspace:
+          at: ./artifacts
+      - run: choco install --no-progress python2
+      - run: python ./artifacts/monorepo_tools_py2_windows_amd64.zip --help
+  test-darwin:
+    macos:
+      xcode: 9.3.0
+    steps:
+      - checkout
+      - run: brew install bazel
+      - run: bazel build //...
+      - run: bazel test //...
+      - run: mv bazel-bin/monorepo_tools.zip monorepo_tools_darwin_amd64.zip
+      - persist_to_workspace:
+          root: '.'
+          paths:
+            - monorepo_tools_darwin_amd64.zip
+  test-darwin-standalone:
+    macos:
+      xcode: 9.3.0
+    steps:
+      - attach_workspace:
+          at: ./artifacts
+      - run: python ./artifacts/monorepo_tools_darwin_amd64.zip --help
+      - run: python2 ./artifacts/monorepo_tools_darwin_amd64.zip --help
+  publish-github-release:
+    docker:
+      - image: cibuilds/github:0.10
+        environment:
+          # https://stackoverflow.com/questions/57828037/cant-attach-circleci-workspace-from-windows-to-linux-due-to-cannot-change-owne
+          TAR_OPTIONS: --no-same-owner
+    steps:
+      - attach_workspace:
+          at: ./artifacts
+      - run:
+          name: "Publish Release on GitHub"
+          command: |
+            VERSION=${CIRCLE_TAG:-${CIRCLE_SHA1}}
+            (
+              cd ./artifacts &&
+              mv monorepo_tools_linux_amd64.zip monorepo_tools_${VERSION}_linux_amd64.zip &&
+              mv monorepo_tools_py2_windows_amd64.zip monorepo_tools_py2_${VERSION}_windows_amd64.zip &&
+              mv monorepo_tools_py3_windows_amd64.zip monorepo_tools_py3_${VERSION}_windows_amd64.zip &&
+              mv monorepo_tools_darwin_amd64.zip monorepo_tools_${VERSION}_darwin_amd64.zip
+            )
+            ghr -draft -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${VERSION} ./artifacts/
+
+workflows:
+  main:
+    jobs:
+      - test-linux:
+          filters:
+            tags:
+              only: /^v.*/
+      - test-linux-standalone:
+          requires:
+            - test-linux
+          filters:
+            tags:
+              only: /^v.*/
+      - test-windows-py3:
+          filters:
+            tags:
+              only: /^v.*/
+      - test-windows-standalone-py3:
+          requires:
+            - test-windows-py3
+          filters:
+            tags:
+              only: /^v.*/
+      - test-windows-py2:
+          filters:
+            tags:
+              only: /^v.*/
+      - test-windows-standalone-py2:
+          requires:
+            - test-windows-py2
+          filters:
+            tags:
+              only: /^v.*/
+      - test-darwin:
+          filters:
+            tags:
+              only: /^v.*/
+      - test-darwin-standalone:
+          requires:
+            - test-darwin
+          filters:
+            tags:
+              only: /^v.*/
+      - publish-github-release:
+          requires:
+            - test-linux-standalone
+            - test-windows-standalone-py2
+            - test-windows-standalone-py3
+            - test-darwin-standalone
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
