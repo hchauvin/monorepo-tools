@@ -110,7 +110,7 @@ jobs:
       - run: python2 ./artifacts/monorepo_tools_darwin_amd64.zip --help
   publish-github-release:
     docker:
-      - image: cibuilds/github:0.10
+      - image: cibuilds/github:0.13
         environment:
           # https://stackoverflow.com/questions/57828037/cant-attach-circleci-workspace-from-windows-to-linux-due-to-cannot-change-owne
           TAR_OPTIONS: --no-same-owner
