@@ -30,6 +30,13 @@ jobs:
       - run: bazel build //...
       - run: bazel test //...
       - run: mv bazel-bin/monorepo_tools.zip monorepo_tools_linux_amd64.zip
+      - run:
+          when: always
+          command: cp -R $(bazel info bazel-testlogs) ./test-logs
+      - store_artifacts:
+          name: Test logs
+          path: ./test-logs
+          destination: test-logs
       - persist_to_workspace:
           root: '.'
           paths:
@@ -53,6 +60,13 @@ jobs:
       - run: bazel build //...
       - run: bazel test //...
       - run: mv bazel-bin/monorepo_tools.zip monorepo_tools_py3_windows_amd64.zip
+      - run:
+          when: always
+          command: cp -R $(bazel info bazel-testlogs) ./test-logs
+      - store_artifacts:
+          name: Test logs
+          path: ./test-logs
+          destination: test-logs
       - persist_to_workspace:
           root: '.'
           paths:
@@ -75,6 +89,13 @@ jobs:
       - run: bazel build //...
       - run: bazel test //...
       - run: mv bazel-bin/monorepo_tools.zip monorepo_tools_py2_windows_amd64.zip
+      - run:
+          when: always
+          command: cp -R $(bazel info bazel-testlogs) ./test-logs
+      - store_artifacts:
+          name: Test logs
+          path: ./test-logs
+          destination: test-logs
       - persist_to_workspace:
           root: '.'
           paths:
@@ -96,6 +117,13 @@ jobs:
       - run: bazel build //...
       - run: bazel test //...
       - run: mv bazel-bin/monorepo_tools.zip monorepo_tools_darwin_amd64.zip
+      - run:
+          when: always
+          command: cp -R $(bazel info bazel-testlogs) ./test-logs
+      - store_artifacts:
+          name: Test logs
+          path: ./test-logs
+          destination: test-logs
       - persist_to_workspace:
           root: '.'
           paths:
