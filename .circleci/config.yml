@@ -54,11 +54,9 @@ jobs:
       name: vs2019
     steps:
       - checkout
-      - run: choco install --no-progress bazel # --version 0.29.1
+      - run: choco install --no-progress bazel
       - run: choco install --no-progress python3 --version=3.7.4
       - run: pip install wheel
-      # - run: (Get-Content ./requirements.txt) -replace 'GitPython==.+', 'GitPython==3.0.3' | Set-Content ./requirements.txt
-      # - run: Get-Content ./requirements.txt
       - run: bazel build //...
       - run: bazel test //...
       - run: mv bazel-bin/monorepo_tools.zip monorepo_tools_py3_windows_amd64.zip
