@@ -54,7 +54,7 @@ jobs:
       name: vs2019
     steps:
       - checkout
-      - run: choco install --no-progress bazel
+      - run: choco install --no-progress bazel --version 0.29.1
       - run: choco install --no-progress python
       - run: pip install wheel
       - run: (Get-Content ./requirements.txt) -replace 'GitPython==.+', 'GitPython==3.0.3' | Set-Content ./requirements.txt
