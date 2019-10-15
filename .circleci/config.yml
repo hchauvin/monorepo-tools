@@ -57,6 +57,8 @@ jobs:
       - run: choco install --no-progress bazel
       - run: choco install --no-progress python
       - run: pip install wheel
+      - run: (Get-Content ./requirements.txt) -replace 'GitPython==.+', 'GitPython==3.0.3' | Set-Content ./requirements.txt
+      - run: Get-Content ./requirements.txt
       - run: bazel build //...
       - run: bazel test //...
       - run: mv bazel-bin/monorepo_tools.zip monorepo_tools_py3_windows_amd64.zip
