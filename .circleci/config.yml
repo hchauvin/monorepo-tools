@@ -113,6 +113,7 @@ jobs:
       xcode: 9.3.0
     steps:
       - checkout
+      - run: brew update-reset
       - run: brew install bazel
       - run: bazel build //...
       - run: bazel test //...
