@@ -1,6 +1,7 @@
 # `monorepo-tools`: Monorepo administration
 
 [![CircleCI](https://circleci.com/gh/hchauvin/monorepo-tools/tree/master.svg?style=svg)](https://circleci.com/gh/hchauvin/monorepo-tools/tree/master)
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fhchauvin%2Fmonorepo-tools.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fhchauvin%2Fmonorepo-tools?ref=badge_shield)
 
 `monorepo-tools` aims at offering a collection of tools to administrate a
 monorepo.  Monorepos have
@@ -114,3 +115,6 @@ very simple strategy than ended up being `import` and didn't try to patch
 ## License
 
 `monorepo-tools` is licensed under [The MIT License](./LICENSE).
+
+
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fhchauvin%2Fmonorepo-tools.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fhchauvin%2Fmonorepo-tools?ref=badge_large)
