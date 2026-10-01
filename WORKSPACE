@@ -16,7 +16,7 @@ versions.check("0.29.0")
 
 git_repository(
     name = "rules_python",
-    commit = "94677401bc56ed5d756f50b441a6a5c7f735a6d4",
+    commit = "fc7dc414a2f4e1d9596dad13fabb2cded3a39a1a",
     remote = "https://github.com/bazelbuild/rules_python.git",
 )
 
